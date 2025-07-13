@@ -279,6 +279,9 @@ grep --color=auto -R -i "passw" --color=always /home/ 2>/dev/null
 grep --color=auto -R -i "passw" --color=always /opt/ 2>/dev/null
 grep --color=auto -R -i "passw" --color=always /mnt/ 2>/dev/null
 
+#Catches: $password='value', password='value', password:"value", PASSWORD=value, etc.
+find /var/www /opt /etc /home -type f \( -name "*.php" -o -name "*.conf" -o -name "*.config" -o -name "*.ini" -o -name "*.xml" -o -name "*.json" -o -name "*.yml" \) 2>/dev/null | xargs grep -E "(password|passwd|pwd|pass)[[:space:]]*[=:][[:space:]]*['\"][^'\"]+['\"]" 2>/dev/null
+
 # Find files containing password strings (less noisy)
 find /etc -type f -exec grep -l "password" {} \; 2>/dev/null
 
