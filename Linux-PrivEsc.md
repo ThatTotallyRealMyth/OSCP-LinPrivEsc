@@ -59,11 +59,7 @@ find /var/www -type f -name "wp-config.php" -o -name "configuration.php" -o -nam
 
 ### 2. Privilege Escalation Vectors
 
-- [ ] **Kernel Exploits**
-    
-    - [ ] Check kernel version and distribution
-    - [ ] Search for matching exploits
-    - [ ] Assess risk of system instability
+- [ ] First google all services that you identified running externally for LPE.
 - [ ] **Credentials Hunting**
     
     - [ ] Check history files (`~/.bash_history`, etc.)
