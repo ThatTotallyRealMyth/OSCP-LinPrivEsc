@@ -977,7 +977,7 @@ for p in $(echo $PATH | tr ":" " "); do find $p -writable -type f 2>/dev/null; d
 
 ## 📡 Service Exploitation (MySQL, Apache, etc.)
 
-### MySQL UDF Exploitation
+### MySQL Exploitation
 
 ```bash
 # Check if MySQL runs as root
@@ -989,6 +989,9 @@ mysqld --version
 
 # Connect to MySQL (if you have credentials)
 mysql -u root -p
+
+#You can also use my script that will connect to a mysql instance and dump it into a nicely formatted text file to allow easy traversal and searching
+#mysqldumper: https://github.com/ThatTotallyRealMyth/mysqldumper
 
 # Create User Defined Function (UDF) to execute commands as root
 # Compile the UDF shared object on your attacking machine
