@@ -138,10 +138,10 @@ and uses ./ convention thus meaning that you can potentially replace a file or c
 ./pspy32                    # Process monitoring (32-bit)
 ./pspy64                    # Process monitoring (64-bit)
 ./suid3num.py               # Analyze SUID binaries
-
-#I reccomend running linpeas_fat.sh -e first and formost. Then run linenum.sh -t or lse.sh -l2
-#Make notes in order of priority or your preference of attack. For example if linpeas shows a sudo group user, you might want to try to find their creds
 ```
+
+I reccomend running linpeas_fat.sh -e first and formost. Then run linenum.sh -t or lse.sh -l2
+Make notes in order of priority or your preference of attack. For example if linpeas shows a sudo group user, you might want to try to find their creds using some of the other commands in this sheet
 
 ### Advanced Process Monitoring
 
