@@ -156,26 +156,6 @@ inotifywait -m -r /etc /var/www /opt 2>/dev/null
 watch -n 1 "netstat -tulpn | grep LISTEN"
 ```
 
-## 🐧 Kernel Exploits
-
-**NOTE**: In OSCP environments, kernel exploits are rarely the intended path. They should be a last resort as they can destabilize systems.
-
-### Detection
-
-```bash
-# Get kernel version using one of these commands
-uname -a
-cat /etc/issue
-cat /proc/version
-rpm -q kernel    # For Redhat Linux
-dmesg | grep Linux    # Debian
-
-ldd --version #identify GNU lib c version and check for exploits
-# Automate exploit detection
-perl linux-exploit-suggester-2.pl 
-./les.sh
-```
-
 ### Exploitation Process
 
 1. Identify kernel version
