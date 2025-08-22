@@ -508,10 +508,7 @@ ls -al /etc/ | grep cron
 ls -al /etc/cron*
 cat /etc/crontab
 find /etc/cron* -type f -readable 2>/dev/null
-cat /etc/at.allow
-cat /etc/at.deny
-cat /etc/cron.allow
-cat /etc/cron.deny
+
 
 # Check user crontabs
 for user in $(cat /etc/passwd | cut -f1 -d':'); do echo "### Crontabs for $user ####"; crontab -u $user -l 2>/dev/null; done
@@ -521,8 +518,6 @@ systemctl list-timers --all
 find /etc/systemd/system -type f -name "*.timer" -ls 2>/dev/null
 find /usr/lib/systemd/system -type f -name "*.timer" -ls 2>/dev/null
 
-# Monitor cron job execution in real-time
-watch -n 1 "ps aux | grep -v grep | grep cron"
 
 # One-liner to find world-writable cron job targets
 find $(cat /etc/crontab | grep -v "#" | grep -v "^$" | awk '{print $NF}' 2>/dev/null) -writable 2>/dev/null
@@ -661,10 +656,6 @@ find / -type f -perm -g=s 2>/dev/null
 
 # Find both SUID and SGID binaries
 find / -type f -a \( -perm -u+s -o -perm -g+s \) 2>/dev/null
-
-# Find specific SUID files owned by root
- -type f -perm -4000 -user root 2>/dev/null | grep -v -E '^/(bin|sbin|usr/bin|usr/lib|usr/sbin)'
-``` -user root 2>/dev/null
 
 # Use suid3num.py for automatic detection and exploitation suggestions
 python3 suid3num.py
