@@ -647,7 +647,7 @@ SUID (Set User ID) and SGID (Set Group ID) are permission bits that allow users 
 
 ### Finding SUID/SGID Binaries
 
-````bash
+```bash
 # Find all SUID binaries (user execution rights)
 find / -type f -perm -u=s 2>/dev/null
 
@@ -742,7 +742,7 @@ gcc -shared -fPIC -o /path/to/missing.so /tmp/evil.c
 
 ### One-liners to Hunt for Vulnerable SUID Binaries
 
-````bash
+```bash
 # Find SUID programs calling system() function
 for suid in $(find / -type f -perm -4000 2>/dev/null); do strings $suid | grep -i "system(" && echo "System call found in $suid"; done
 
@@ -756,7 +756,7 @@ for suid in $(find / -type f -perm -4000 2>/dev/null); do strings $suid | grep -
 find / -type f -perm -4000
 
 #Check the strings in SUID binary, espcially if it looks custom and see if its calling other programs or executing files without full path
-
+```
 ### Environment Variable Exploitation
 
 #### For Relative Binary References
@@ -766,7 +766,7 @@ Requirements:
 
 ```bash
 # Check for binary calls using strings
-strings /usr/local/bin/suid-binary | grep -E "exec|system|popen|fork"
+strings /usr/local/bin/suid-binary
 
 # Determine if binary uses system() or execve() with relative paths
 strace -v -f -e execve /usr/local/bin/suid-binary 2>&1 | grep exec
