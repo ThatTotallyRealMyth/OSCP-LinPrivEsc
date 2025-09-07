@@ -156,13 +156,6 @@ inotifywait -m -r /etc /var/www /opt 2>/dev/null
 watch -n 1 "netstat -tulpn | grep LISTEN"
 ```
 
-### Exploitation Process
-
-1. Identify kernel version
-2. Search for matching exploits on exploit-db
-3. Download and examine exploit code
-4. Compile on target system (if possible) or cross-compile(use the -static flag when you can and remeber glibc and library dependencies)
-
 
 ## Password Mining & Credentials Hunting
 
