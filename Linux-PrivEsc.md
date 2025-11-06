@@ -74,9 +74,9 @@ find /var/www -type f -name "wp-config.php" -o -name "configuration.php" -o -nam
     # Linux Privilege Escalation Techniques
     
 
-> "In most OSCP scenarios, there is an intended privilege escalation path that does not require kernel exploits."
 
-## 🔍 Initial Enumeration & Strategy
+
+##  Initial Enumeration & Strategy
 
 ### Privilege Escalation Strategy
 
