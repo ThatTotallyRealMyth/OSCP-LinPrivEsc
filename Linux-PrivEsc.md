@@ -122,10 +122,14 @@ watch -n 1 "ps aux | grep root"
 # Use pspy to monitor processes without root permissions
 ./pspy64  # be paitent and look for root/uid 0 related events
 ```
-If you see any root/uid 0 processes running; take note of the files being executed. Are the files writeable to you? Are their any factors the script or process is running you can overwrite or modify?
+If you see any root/uid 0 processes running; take note of the files being executed. Are the files writeable to you? Are their any factors the script or process is running you can overwrite or modify? We can use this one liner to check for running processes as root that may have insecure privlidges present
 
+```bash
+for i in $(ps auxww | grep root | awk '{ print $11 }' | grep -v '^\[' | grep -v COMMAND | grep -v '(' | grep -v ':$' | grep -v 'supervising' | sort | uniq); do ls -la $(which "$(echo $i | sed -e 's#^\./##')");done
+```
 Make sure you read the contents of the scripts running and look at their permissions to determine if anything abusable is present. For example if the script does cd /some/directory/you/can/write
 and uses ./ convention thus meaning that you can potentially replace a file or create a file within that directory that the script is executing an element from
+
 
 ### Essential Enumeration Scripts
 
