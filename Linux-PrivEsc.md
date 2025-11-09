@@ -1145,7 +1145,7 @@ find / -type d -perm -o+w 2>/dev/null | grep -v '/proc\|/sys\|/dev'
 find / -type f -executable -writable 2>/dev/null | grep -v '/proc\|/sys\|/dev'
 ```
 
-## 💾 Kernel Exploits (Last Resort)
+## Kernel Exploits (Last Resort, High chance it wont work + never use it IRL)
 
 ### Detection and Identification
 
