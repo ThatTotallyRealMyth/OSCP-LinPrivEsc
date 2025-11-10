@@ -837,7 +837,7 @@ export -f /usr/sbin/service
 /usr/local/bin/suid-binary
 ```
 
-### Abusing Bash Debugging Mode
+### Abusing Bash Debugging Mode (Bash < 4.4)
 
 ```bash
 # For binaries that use system() or similar and run via bash
