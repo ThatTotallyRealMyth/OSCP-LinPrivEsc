@@ -1,9 +1,17 @@
-# OSCP-LinPrivEsc
-A Linux Privilege Escalation cheatsheet I made prepping for the OSCP and beyond. Having done over 40 boxes on VirtualHacking Labs, a little over 10 on PG and the OSCP challenge labs; I came across a nice range of pirlivge escalation vectors that I tried my best to document. 
+# The LinPrivEsc Bible
+A personal Linux privilege escalation I have cooked up for near a year now that I hope serves you like it has me : )
 
-The cheatsheet may not be fully comprehensive but I think it really does come close. I have yet to experince a box in which my cheatsheet was not sufficient in giving both the exploit path but also being a reference on how to exploit it. I am hoping others
-may benefit from it too!
+I started this as a set of personal, messy notes while doing the Tiberius priv-esc course, OSCP challenge labs and a bunch of HTB/THM/PG/VHL boxes. Over time as I gained more doamin specific knowledge be it from CTFs, finding real world CVEs or from real engagements; The notes grew beyond their original use and that Im really proud of :3
 
-If you find an OSCP challenge lab or HTB/THM box in which this sheet provided no leads then let me know and Ill figure out how to plug that gap! Im hoping this repo will continue to be refined with more techniques, more specific methods for detection and exploitation!
+Why do I call this the bible? Well I hated the generic “look for config files for creds” or "Overwrite a file executed by privlidged process" line on most cheatsheets that made you feel either a)dumb cuz you couldnt figure it out or b)so vague that, I feel at least, mislead you in your quest for root; so I wrote grep/find commands for creds in the respective configuration files of the common services (Apache, MySQL, Tomcat, WordPress, Drupal, Joomla, etc.), one liners to discover Shared object files that are loaded by a binary that are writeable to your user, running init.d scripts writeable to your user, different ways to priv esc when your a member of an exotoic group(think disk or adm group) and much more! 
 
+For every pattern I try to give a concise check (usually a one-liner) and a one- or two-line abuse command you can run straight away. I find that to be the most helpful as its easier for you to run 100 commands so long as you know okay if this command gives me no output then that specific vector defintively can not be the way. This ensures that you can copy/paste a command, no output then move onto the next check, if there is output then itll be hyper specific to the targetted enumaration as to not overwhelm or mislead you. 
+
+I add stuff as I find it new CVEs, misconfigs, or anything that wasted time for me in the past such that I never have to spend time/effort finding and abusing it again. You can check out the projects commit history if you want recent examples for a CVE I found that I turned into a one liner.
+
+A qucik tip about the project is that it’s big and  hyper specific, so if you’re a beginner it can feel overwhelming. I suggest doing a fast read through, then use it as a checklist while practising boxes. After a few runs the patterns start to stick and you’ll move way faster. You will not only be able to map out each box to the checks found here but you will be able to mix and match the checks, abuses and commands to do new things! I tried to make sure the commands were as clear as can be. No overly convoluted shell magic, and plenty of pipe(|) useage to make it easy for you to yank one filtering critierum into your own command. Kinda like Build A Bear xD
+
+This is for learning, CTFs and authorised testing only. You most defo shouldnt use it on systems you don’t have permission to test and dont do anything youre not sure how itll play out : ) 
+
+Open an issue or Pull Request if you have any suggestions on improvements and making this repo better/more useful for the community. 
 
