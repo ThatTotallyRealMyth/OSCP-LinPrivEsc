@@ -768,6 +768,30 @@ ldd /usr/bin/some_binary | awk '{print $3}' | grep '^/' | while read -r so; do [
 ```
 This will show you which file you could write to and then replace it using .so payload I had referenced elsewehre via cat bad.so > writrable_target.so. The same would be if its directory was writable to your user.
 
+### RPATH / RUNPATH in Shared Objects
+
+RPATH / RUNPATH are hard-coded library search paths embedded in ELF executables. They tell the dynamic linker where to look for shared libraries used by that binary.
+
+readelf -d <binary> shows these as RPATH or RUNPATH entries. (NEEDED lines show which libraries are required.)
+
+Some key differences include(there are others I believe but havent come around to verifying):
+
+- DT_RPATH (RPATH) is older. It is searched before LD_LIBRARY_PATH.
+
+- DT_RUNPATH (RUNPATH) is newer. It is searched after LD_LIBRARY_PATH.
+
+Because RPATH/RUNPATH is embedded in the binary, if you can write into a directory listed there (or otherwise influence files under that path)  you can cause the program to load your supplied libraries/SO files. Note that these are a bit different than what you see when you used the above check to with ldd:
+
+```bash
+#Show RPATH / RUNPATH and needed libs for a given binary
+readelf -d ./some_binary | egrep "NEEDED|RPATH|RUNPATH"
+
+#Hunt for RPATH/RUMPATH in a target binary and check for any writeable files/directories within the directive
+bin=/usr/bin/some_binary; readelf -d "$bin" 2>/dev/null|awk -F'[][]' '/RPATH|RUNPATH/{print $2}'|tr ':' '\n'|while IFS= read -r p; do [ -z "$p" ]&&continue; [ -d "$p" ]&&([ -w "$p" ]&&echo "RPATH Dir Write: $p"||echo "RPATH Dir OK: $p")||echo "RPATH Dir Missing: $p"; done; ldd "$bin" 2>/dev/null|awk '{print $3}'|grep '^/'|while IFS= read -r so; do [ -z "$so" ]&&continue; [ -w "$so" ]&&echo "File Write: $so"; d=$(dirname "$so"); [ -w "$d" ]&&echo "Dir Write: $d"; done
+```
+Bassically its RPATH present → path(s) = … → path writable? yes/no → binary SUID? yes/no → chance of abuse level.
+
+As a general comment for all the above listed Shared Object Abuse primitives; your biggest wins will come from targetting exotic/custom files implemented by in house developers or on weird systems such as printers(yes printers) and other IoT devices with less consumer facing/widely deployed tooling. 
 ### One-liners to Hunt for Vulnerable SUID Binaries
 
 ```bash
