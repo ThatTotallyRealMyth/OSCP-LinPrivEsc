@@ -10,6 +10,7 @@ Why do I call this the bible? Well I hated the generic “look for config files 
 And so I wrote commands for creds in the respective configuration files of the common services (Apache, MySQL, Tomcat, WordPress, etc.), one liners to discover Shared object files that are loaded by a binary that are writeable to your user, running init.d scripts writeable to your user, different ways to priv esc when your a member of an exotoic group(think disk or adm group) and much more! 
 
 For every pattern I try to give a concise check (usually a one-liner) and a one- or two-line abuse command you can run straight away. I find that to be the most helpful as its easier for you to run commands that "ask" one question, for example are there any startup scripts that I can write to, and either the files are returned or nothing is(meaning no there isnt). 
+
 I add stuff as I find it new CVEs, misconfigs, or anything that wasted time for me in the past such that I never have to spend time/effort finding and abusing it again. You can check out the projects commit history if you want recent examples for a CVE I found that I turned into a one liner.
 
 A qucik tip about the project is that it’s big and hyper specific, so if you’re a beginner it can feel overwhelming. I suggest doing a fast read through, then use it as a checklist while going through your workflows. That way you have a rough idea of where everything is and minimize lost time.
