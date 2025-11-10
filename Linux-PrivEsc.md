@@ -787,7 +787,7 @@ Because RPATH/RUNPATH is embedded in the binary, if you can write into a directo
 readelf -d ./some_binary | egrep "NEEDED|RPATH|RUNPATH"
 
 #Hunt for RPATH/RUMPATH in a target binary and check for any writeable files/directories within the directive
-bin=/usr/bin/some_binary; readelf -d "$bin" 2>/dev/null|awk -F'[][]' '/RPATH|RUNPATH/{print $2}'|tr ':' '\n'|while IFS= read -r p; do [ -z "$p" ]&&continue; [ -d "$p" ]&&([ -w "$p" ]&&echo "RPATH Dir Write: $p"||echo "RPATH Dir OK: $p")||echo "RPATH Dir Missing: $p"; done; ldd "$bin" 2>/dev/null|awk '{print $3}'|grep '^/'|while IFS= read -r so; do [ -z "$so" ]&&continue; [ -w "$so" ]&&echo "File Write: $so"; d=$(dirname "$so"); [ -w "$d" ]&&echo "Dir Write: $d"; done
+bin=/usr/bin/some_binary; readelf -d "$bin" 2>/dev/null | awk -F'[][]' '/RPATH|RUNPATH/{print $2}' | tr ':' '\n' | while IFS= read -r dir; do [ -w "$dir" ] && echo "Writable RPATH Dir: $dir"; for f in "$dir"/*.so*; do [ -f "$f" ] && [ -w "$f" ] && echo "Writable SO: $f"; done; done
 ```
 Bassically its RPATH present → path(s) = … → path writable? yes/no → binary SUID? yes/no → chance of abuse level.
 
