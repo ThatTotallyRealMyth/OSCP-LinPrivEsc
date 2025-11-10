@@ -9,7 +9,7 @@ For every pattern I try to give a concise check (usually a one-liner) and a one-
 
 I add stuff as I find it new CVEs, misconfigs, or anything that wasted time for me in the past such that I never have to spend time/effort finding and abusing it again. You can check out the projects commit history if you want recent examples for a CVE I found that I turned into a one liner.
 
-A qucik tip about the project is that it’s big and  hyper specific, so if you’re a beginner it can feel overwhelming. I suggest doing a fast read through, then use it as a checklist while practising boxes. After a few runs the patterns start to stick and you’ll move way faster. You will not only be able to map out each box to the checks found here but you will be able to mix and match the checks, abuses and commands to do new things! I tried to make sure the commands were as clear as can be. No overly convoluted shell magic, and plenty of pipe(|) useage to make it easy for you to yank one filtering critierum into your own command. Kinda like Build A Bear xD
+A qucik tip about the project is that it’s big and  hyper specific, so if you’re a beginner it can feel overwhelming. I suggest doing a fast read through, then use it as a checklist while going through your workflows. That way you have a rough idea of where everything is and minimize lost time.
 
 This is for learning, CTFs and authorised testing only. You most defo shouldnt use it on systems you don’t have permission to test and dont do anything youre not sure how itll play out : ) 
 
