@@ -6,6 +6,7 @@ I started this as a set of personal, messy notes while doing the Tiberius priv-e
 Why do I call this the bible? Well I hated the generic “look for config files for creds” or "Overwrite a file executed by privlidged process" line on most cheatsheets that made you feel either:
   - Dumb cuz you couldnt figure what the author meant by that one sentence and linpeas isnt giving you any breaks either OR 
   - So vague that, I feel at least, mislead you in your quest for root
+
 And so I wrote commands for creds in the respective configuration files of the common services (Apache, MySQL, Tomcat, WordPress, etc.), one liners to discover Shared object files that are loaded by a binary that are writeable to your user, running init.d scripts writeable to your user, different ways to priv esc when your a member of an exotoic group(think disk or adm group) and much more! 
 
 For every pattern I try to give a concise check (usually a one-liner) and a one- or two-line abuse command you can run straight away. I find that to be the most helpful as its easier for you to run commands that "ask" one question, for example are there any startup scripts that I can write to, and either the files are returned or nothing is(meaning no there isnt). 
