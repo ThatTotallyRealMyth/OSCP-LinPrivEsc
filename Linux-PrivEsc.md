@@ -788,10 +788,12 @@ Requirements:
  - You have write permissions over a directory in which a privlidged/elebvated program is calling a .so file OR
  - You own a directory in which a SO file is called from by a privlidged process(this appears differently then having explicit write permissions)
 ```bash
+#To get a running list of all processes running and each of the shared objects they have loaded
+cd /proc && for i in */; do cat $i/cmdline && echo && grep ramdisk $i/maps;done
+
+#Detect SO files and/or associated directories loaded by the target that are writable to current user
 ldd /usr/bin/some_binary | awk '{print $3}' | grep '^/' | while read -r so; do [ -w "$so" ] && echo "File Write: $so"; [ -w "$(dirname "$so")" ] && echo "Dir Write: $(dirname "$so")/$"; done
 ```
-This will show you which file you could write to and then replace it using .so payload I had referenced elsewehre via cat bad.so > writrable_target.so. The same would be if its directory was writable to your user.
-
 ### RPATH / RUNPATH in Shared Objects
 
 RPATH / RUNPATH are hard-coded library search paths embedded in ELF executables. They tell the dynamic linker where to look for shared libraries used by that binary.
