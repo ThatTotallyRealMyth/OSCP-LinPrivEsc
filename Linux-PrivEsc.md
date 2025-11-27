@@ -789,7 +789,10 @@ Requirements:
  - You own a directory in which a SO file is called from by a privlidged process(this appears differently then having explicit write permissions)
 ```bash
 #To get a running list of all processes running and each of the shared objects they have loaded
-cd /proc && for i in */; do cat $i/cmdline && echo && grep ramdisk $i/maps;done
+lsof -n | grep 'DEL\|REG' | grep '\.so$'
+
+#not ALL *nix systems are garunteed to have lsof so instead we can use the following to look for every process and its loaded shared objects
+for i in /proc/[0-9]*/maps; do echo -e "\n--- $(basename $(dirname $i)) ---\n$(grep '\.so' $i 2>/dev/null | grep -v 'vdso\|vsyscall')"; done
 
 #Detect SO files and/or associated directories loaded by the target that are writable to current user
 ldd /usr/bin/some_binary | awk '{print $3}' | grep '^/' | while read -r so; do [ -w "$so" ] && echo "File Write: $so"; [ -w "$(dirname "$so")" ] && echo "Dir Write: $(dirname "$so")/$"; done
